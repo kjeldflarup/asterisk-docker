@@ -1,23 +1,23 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 RUN rm -f /etc/localtime; ln -s /usr/share/zoneinfo/Europe/Copenhagen /etc/localtime
 
-RUN apt-get check && \
-    apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \ 
+RUN apt update && \
+    DEBIAN_FRONTEND=noninteractive apt install -y \ 
         build-essential zip unzip libreadline-dev curl libncurses-dev mc aptitude \
         tcsh scons libpcre++-dev libboost-dev libboost-all-dev libreadline-dev \
         libboost-program-options-dev libboost-thread-dev libboost-filesystem-dev \
         libboost-date-time-dev gcc g++ git make libmongo-client-dev \
         dh-autoreconf lame sox libzmq3-dev libzmqpp-dev libtiff-tools perl \
 	net-tools tcpdump \
-	subversion libvpb1 uuid-dev apt-utils \
-    apt-get clean
+	subversion libvpb1 uuid-dev apt-utils && \
+    apt clean
 
 
 WORKDIR /usr/src
-RUN git clone -b 13 --depth 1 http://gerrit.asterisk.org/asterisk 
+#RUN git clone -b 13 --depth 1 http://gerrit.asterisk.org/asterisk 
 #RUN git clone -b 16.1.0 https://github.com/asterisk/asterisk.git
+RUN git clone -b 13 https://github.com/asterisk/asterisk.git
 
 WORKDIR /usr/src/asterisk
 # Configure
@@ -111,9 +111,9 @@ RUN menuselect/menuselect \
 # ./buildmenu.sh app_stasis res_stasis cdr_syslog chan_bridge_media chan_rtp chan_pjsip codec_a_mu codec_ulaw pbx_config
 
 # Continue with a standard make.
-RUN make 1> /dev/null \
-    make install 1> /dev/null \
-    make samples 1> /dev/null \
+RUN make 1> /dev/null && \
+    make install 1> /dev/null && \
+    make samples 1> /dev/null && \
     rm -rf /usr/src/asterisk
 WORKDIR /
 
